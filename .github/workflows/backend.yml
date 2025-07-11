@@ -25,19 +25,19 @@ jobs:
       - name: Build MySQL Docker image
         working-directory: db # db 폴더로 이동
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/dockerdb .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/todolistdb .
 
       - name: Push MySQL Docker image
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/dockerdb
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/todolistdb
 
       # 4. Backend Docker 이미지 빌드 및 푸시
       - name: Build Backend Docker image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/dockerbackend .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/todolistbackend .
       - name: Push Backend Docker image
         run: |
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/dockerbackend  
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/todolistbackend  
 
   deploy:
     needs: build_and_push
@@ -50,19 +50,19 @@ jobs:
           host: ${{ secrets.LIVE_SERVER_IP }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            if [ "$(sudo docker ps -a -q -f name=dockerdb)" ]; then
-              sudo docker rm -f dockerdb
+            if [ "$(sudo docker ps -a -q -f name=todolistdb)" ]; then
+              sudo docker rm -f todolistdb
             fi
-            if [ "$(sudo docker ps -a -q -f name=dockerbackend)" ]; then
-              sudo docker rm -f dockerbackend
+            if [ "$(sudo docker ps -a -q -f name=todolistbackend)" ]; then
+              sudo docker rm -f todolistbackend
             fi
-            if [ "$(sudo docker images -q ${{ secrets.DOCKERHUB_USERNAME }}/dockerdb)" ]; then
-              sudo docker rmi -f ${{ secrets.DOCKERHUB_USERNAME }}/dockerdb
+            if [ "$(sudo docker images -q ${{ secrets.DOCKERHUB_USERNAME }}/todolistdb)" ]; then
+              sudo docker rmi -f ${{ secrets.DOCKERHUB_USERNAME }}/todolistdb
             fi
-            if [ "$(sudo docker images -q ${{ secrets.DOCKERHUB_USERNAME }}/dockerbackend)" ]; then
-              sudo docker rmi -f ${{ secrets.DOCKERHUB_USERNAME }}/dockerbackend
+            if [ "$(sudo docker images -q ${{ secrets.DOCKERHUB_USERNAME }}/todolistbackend)" ]; then
+              sudo docker rmi -f ${{ secrets.DOCKERHUB_USERNAME }}/todolistbackend
             fi
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/dockerdb
-            sudo docker run -d -p 3308:3306 --name dockerdb -v dockerdb_volume:/var/lib/mysql ${{ secrets.DOCKERHUB_USERNAME }}/dockerdb
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/dockerbackend
-            sudo docker run -d -p 8080:8080 --name dockerbackend ${{ secrets.DOCKERHUB_USERNAME }}/dockerbackend
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/todolistdb
+            sudo docker run -d -p 3308:3306 --name todolistdb -v todolistdb_volume:/var/lib/mysql ${{ secrets.DOCKERHUB_USERNAME }}/todolistdb
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/todolistbackend
+            sudo docker run -d -p 8080:8080 --name todolistbackend ${{ secrets.DOCKERHUB_USERNAME }}/todolistbackend
